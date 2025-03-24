@@ -12,9 +12,12 @@ import { authFormSchema } from "@/constants/AuthFormSchema"
 import { toast } from "sonner"
 import FormField from "./FormField"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 
 export default function AuthForm({ type }: { type: FormType }) {
+    
+    const router = useRouter()
     const [mounted , setMounted] = useState(false)
     const formSchema = authFormSchema(type)
     const form = useForm<z.infer<typeof formSchema>>({
@@ -31,9 +34,11 @@ export default function AuthForm({ type }: { type: FormType }) {
             if (type === "sign-up") {
                 console.log("sign-up", values)
                 toast.success("Account created successfully")
+                router.push("/sign-in")
             } else {
                 console.log("sign-in", values)
                 toast.success("Signed in successfully")
+                router.push("/")
             }
         } catch (error) {
             console.log(error)
