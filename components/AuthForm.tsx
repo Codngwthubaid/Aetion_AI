@@ -13,12 +13,16 @@ import { toast } from "sonner"
 import FormField from "./FormField"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
+import { app } from "@/firebase/client"
+import { signUp, signIn } from "@/lib/actions/auth.action"
 
 
 export default function AuthForm({ type }: { type: FormType }) {
-    
+
+    const auth = getAuth(app)
     const router = useRouter()
-    const [mounted , setMounted] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const formSchema = authFormSchema(type)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -29,14 +33,29 @@ export default function AuthForm({ type }: { type: FormType }) {
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             if (type === "sign-up") {
+                const { name, email, password } = values
                 console.log("sign-up", values)
+                const userCreditentials = await createUserWithEmailAndPassword(auth, email, password)
+                const result = await signUp({ uid: userCreditentials.user.uid, name: name!, email, password })
+
+                if (!result?.success) toast.error(result?.message)
+                else toast.success("Account created successfully, Please Sign In")
                 toast.success("Account created successfully")
                 router.push("/sign-in")
             } else {
+                const { email, password } = values
                 console.log("sign-in", values)
+
+                const userCreditentials = await signInWithEmailAndPassword(auth, email, password)
+                const idToken = await userCreditentials.user.getIdToken()
+                if (!idToken) { toast.error("SignIn failed"); return }
+
+                const result = await signIn({ email, idToken })
+                if (!result?.success) toast.error(result?.message)
+
                 toast.success("Signed in successfully")
                 router.push("/")
             }
@@ -48,8 +67,8 @@ export default function AuthForm({ type }: { type: FormType }) {
 
     const isSignIn = type === "sign-in"
 
-    useEffect(() => {setMounted(true)})
-    if (!mounted) return null  
+    useEffect(() => { setMounted(true) })
+    if (!mounted) return null
 
     return (
         <div className="card-border lg:min-w-[566px]">
@@ -65,7 +84,7 @@ export default function AuthForm({ type }: { type: FormType }) {
                         {!isSignIn && (
                             <FormField control={form.control} name="name" placeholder="John Doe" label="Name" />
                         )}
-                        <FormField control={form.control} name="email" placeholder="Email" label="Email" type="email"/>
+                        <FormField control={form.control} name="email" placeholder="Email" label="Email" type="email" />
                         <FormField control={form.control} name="password" placeholder="Password" label="Password" type="password" />
                         <Button type="submit" className="btn">{isSignIn ? "Sign In" : "Create an account"}</Button>
                     </form>
@@ -80,3 +99,5 @@ export default function AuthForm({ type }: { type: FormType }) {
         </div>
     )
 }
+
+// Removed the placeholder function as the actual Firebase method is being used.

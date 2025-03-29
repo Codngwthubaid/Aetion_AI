@@ -1,7 +1,5 @@
-import { cn, getTechLogos } from "@/utils";
-import { group } from "console";
+import { cn, getTechLogos } from "@/lib/utils";
 import Image from "next/image";
-import { relative } from "path";
 export default async function DisplayTechIcons({techStack} : TechIconProps) {
     const techIcons = await getTechLogos(techStack);
     
