@@ -32,11 +32,11 @@ export default function RootLayout({
       <body
         className={`${nunito.variable} ${ptSans.variable} antialiased relative`}
       >
-        <div className="texture" />
         <StackProvider app={stackServerApp}>
           <StackTheme>
             <Suspense>
               <ConvexClientProvider>
+                <div className="texture" />
                 {children}
               </ConvexClientProvider>
             </Suspense>

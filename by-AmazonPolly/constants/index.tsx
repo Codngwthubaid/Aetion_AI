@@ -1,5 +1,11 @@
+import mockinterview from "@/public/mi.jpg";
+import quesansprep from "@/public/qai.jpg";
+import lecturtopic from "@/public/lt.jpg";
+import langprep from "@/public/lp.jpg";
+import mentorship from "@/public/ms.jpg";
+import instructor from "@/public/ubaid.jpg";
 import { StaticImageData } from "next/image";
-import demoImage from "@/public/demoImg.png"
+
 interface Feature {
     label: string;
     icon: StaticImageData;
@@ -13,34 +19,34 @@ interface Instructors {
 export const features: Feature[] = [
     {
         label: "Mock Interview",
-        icon: demoImage,
+        icon: mockinterview,
     },
     {
         label: "Ques Ans Prep",
-        icon: demoImage,
+        icon: quesansprep,
     },
     {
         label: "Lecture topic",
-        icon: demoImage,
+        icon: lecturtopic,
     },
     {
         label: "Lang Prep",
-        icon: demoImage,
+        icon: langprep,
     },
     {
         label: "Mentorship",
-        icon: demoImage,
+        icon: mentorship,
     },
 ]
 
 
 export const AiInstructors: Instructors[] = [
     {
-        label: "GPT-4",
-        icon: demoImage,
+        label: "Ubaid",
+        icon: instructor,
     },
     {
-        label: "Claude 3",
-        icon: demoImage,
+        label: "Mustafa",
+        icon: instructor,
     },
 ]
