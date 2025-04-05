@@ -1,3 +1,5 @@
+"use client"
+import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
@@ -7,10 +9,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { AiModels } from "@/constants"
+import { AiInstructors } from "@/constants"
 import Image from "next/image"
+import { useState } from "react"
 
 export function UserInputDailogBox({ children, feature }: any) {
+    const [isSelectedMaster, setIsSelectedMaster] = useState("");
+
     return (
         <Dialog>
             <DialogTrigger>{children}</DialogTrigger>
@@ -25,12 +30,18 @@ export function UserInputDailogBox({ children, feature }: any) {
                             </span>
                             <span>
                                 <span>Enter your topic to master your skills in {feature.label}</span>
-                                {AiModels.map((model, index) => (
-                                    <span key={index} className="flex border items-center gap-2 my-2">
-                                        <Image width={32} height={32} src={model.icon} alt={model.label} />
-                                        <span>{model.label}</span>
-                                    </span>
-                                ))}
+                                <span className="flex flex-wrap justify-start items-center gap-x-2 relative">
+                                    {AiInstructors.map((model, index) => (
+                                        <span key={index} className={`flex flex-col items-center gap-2 my-2 ${isSelectedMaster == model.label && "border-2 "}p-2 rounded-md cursor-pointer`} onClick={() => setIsSelectedMaster(model.label)}>
+                                            <Image width={100} height={100} src={model.icon} alt={model.label} />
+                                            <span className="absolute bottom-5 text-white">{model.label}</span>
+                                        </span>
+                                    ))}
+                                </span>
+                            </span>
+                            <span className="flex justify-between items-center mt-4">
+                                <Button variant={"ghost"}>Cancel</Button>
+                                <Button>Next</Button>
                             </span>
                         </span>
                     </DialogDescription>

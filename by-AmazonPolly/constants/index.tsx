@@ -5,7 +5,7 @@ interface Feature {
     icon: StaticImageData;
 }
 
-interface Models {
+interface Instructors {
     label: string;
     icon: StaticImageData;
 }
@@ -34,21 +34,13 @@ export const features: Feature[] = [
 ]
 
 
-export const AiModels: Models[] = [
+export const AiInstructors: Instructors[] = [
     {
         label: "GPT-4",
         icon: demoImage,
     },
     {
         label: "Claude 3",
-        icon: demoImage,
-    },
-    {
-        label: "Gemini 1.5",
-        icon: demoImage,
-    },
-    {
-        label: "Claude 2",
         icon: demoImage,
     },
 ]
