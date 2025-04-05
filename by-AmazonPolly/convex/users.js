@@ -2,10 +2,8 @@ import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 
 export const CreateUser = mutation({
-    args: {
-        name: v.string(),
-        email: v.string()
-    },
+    args: { name: v.string(), email: v.string() },
+
     handler: async (ctx, args) => {
         // if user exists 
         const checkUserExistance = await ctx.db.query("users").filter(q => q.eq(q.field("email"), args.email)).collect();

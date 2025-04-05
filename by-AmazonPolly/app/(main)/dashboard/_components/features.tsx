@@ -22,8 +22,8 @@ export default function Features() {
                                 <CardHeader className="flex justify-center p-4">
                                     <div className="p-3 rounded-full transition-colors duration-300">
                                         <Image
-                                            width={32}
-                                            height={32}
+                                            width={100}
+                                            height={100}
                                             src={feature.icon}
                                             alt={feature.label}
                                             className="object-contain"
