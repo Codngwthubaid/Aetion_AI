@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { Suspense } from "react";
+import { Nunito, PT_Sans } from "next/font/google";
+import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ptSans = PT_Sans({
+  variable: "--font-pt-sans",
   subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,8 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${nunito.variable} ${ptSans.variable} antialiased relative`}
       >
+        <div className="texture" />
         <StackProvider app={stackServerApp}>
           <StackTheme>
             <Suspense>
@@ -44,3 +46,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+
