@@ -15,25 +15,30 @@ import { api } from "@/convex/_generated/api"
 import { useMutation } from "convex/react"
 import { Loader } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export function UserInputDailogBox({ children, feature }: any) {
 
     const [isSelectedMaster, setIsSelectedMaster] = useState("")
     const [isSelectedTopic, setIsSelectedtopic] = useState("")
+    const [isOpenDailog, setIsOpenDailog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const createDiscussionRoom = useMutation(api.discussionRoom.DiscussionRoom)
+    const router = useRouter()
 
     const createDiscussionRoomHandler = async () => {
         setIsLoading(true)
-        const result = await createDiscussionRoom({ topic: isSelectedTopic, topicName : feature.label, masterName: isSelectedMaster })
+        const result = await createDiscussionRoom({ topic: isSelectedTopic, topicName: feature.label, masterName: isSelectedMaster })
         console.log(result);
         setIsLoading(false)
+        setIsOpenDailog(false)
+        router.push(`/discussion-room/${result}`)
     }
 
 
     return (
-        <Dialog>
+        <Dialog open={isOpenDailog} onOpenChange={setIsOpenDailog}>
             <DialogTrigger>{children}</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -60,7 +65,7 @@ export function UserInputDailogBox({ children, feature }: any) {
                                     <Button variant={"destructive"} className="cursor-pointer">Cancel</Button>
                                 </DialogClose>
                                 <Button className="cursor-pointer" disabled={(!isSelectedTopic || !isSelectedMaster || isLoading)} onClick={createDiscussionRoomHandler}>
-                                   {isLoading && <Loader className="animate-spin"/>} Next</Button>
+                                    {isLoading && <Loader className="animate-spin" />} Next</Button>
                             </span>
                         </span>
                     </DialogDescription>

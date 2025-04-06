@@ -1,41 +1,34 @@
-import mockinterview from "@/public/mi.jpg";
-import quesansprep from "@/public/qai.jpg";
-import lecturtopic from "@/public/lt.jpg";
-import langprep from "@/public/lp.jpg";
-import mentorship from "@/public/ms.jpg";
-import instructor from "@/public/ubaid.jpg";
-import { StaticImageData } from "next/image";
 
 interface Feature {
     label: string;
-    icon: StaticImageData;
+    icon: string;
 }
 
 interface Instructors {
     label: string;
-    icon: StaticImageData;
+    icon: string;
 }
 
 export const features: Feature[] = [
     {
         label: "Mock Interview",
-        icon: mockinterview,
+        icon: "/mi.jpg",
     },
     {
         label: "Ques Ans Prep",
-        icon: quesansprep,
+        icon: "/qai.jpg",
     },
     {
         label: "Lecture topic",
-        icon: lecturtopic,
+        icon: "/lt.jpg",
     },
     {
         label: "Lang Prep",
-        icon: langprep,
+        icon: "/lp.jpg",
     },
     {
         label: "Mentorship",
-        icon: mentorship,
+        icon: "/ms.jpg",
     },
 ]
 
@@ -43,10 +36,11 @@ export const features: Feature[] = [
 export const AiInstructors: Instructors[] = [
     {
         label: "Ubaid",
-        icon: instructor,
+        icon: "/ubaid.jpg",
     },
     {
         label: "Mustafa",
-        icon: instructor,
+        icon: "/ubaid.jpg",
+
     },
 ]
