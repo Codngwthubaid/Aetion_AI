@@ -10,6 +10,8 @@ import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
 import { Loader } from "lucide-react"
+import Chat from "./_components/Chat"
+
 
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
@@ -32,7 +34,14 @@ export default function DiscussionRoomPage() {
     const [enableMicrophone, setEnableMicrophone] = useState(false);
     const [textChunks, setTextChunks] = useState<string[]>([]);
     const [fullTranscript, setFullTranscript] = useState<string>("");
-    const [aiResponses, setAiResponses] = useState<string[]>([]);
+    const [aiResponses, setAiResponses] = useState<{ role: string, content: string }[]>([
+        {
+            role: "assistant",
+            content: `Hello ${user?.displayName}! Thanks for joining the AI powered interview session.`
+        }
+    ]);
+
+
     const recorder = useRef<any>(null);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
     const lastProcessedChunkRef = useRef<string>("");
@@ -48,20 +57,28 @@ export default function DiscussionRoomPage() {
         setMasterDetails(fetchMasterDetails)
     }, [discussionRoomData])
 
-    // Process AI response for new chunks
     // In the processAIResponse function, modify it like this:
     const processAIResponse = async (newChunk: string) => {
         if (newChunk && newChunk !== lastProcessedChunkRef.current) {
-            const aiResponse = await aiModel({
-                topic: discussionRoomData?.topic || "default topic",
-                feature: discussionRoomData?.topicName || "default feature",
-                message: newChunk
-            });
-            console.log("AI Response:", aiResponse);
-            if (aiResponse && typeof aiResponse === 'string') {
-                setAiResponses(prev => [...prev, aiResponse]);
+            try {
+                const aiResponse = await aiModel({
+                    topic: discussionRoomData?.topic || "default topic",
+                    feature: discussionRoomData?.topicName || "default feature",
+                    message: newChunk
+                });
+                console.log("AI Response:", aiResponse);
+                if (aiResponse && typeof aiResponse === 'string') {
+                    // Add both user message and AI response
+                    setAiResponses(prev => [
+                        ...prev,
+                        { role: "user", content: newChunk },
+                        { role: "assistant", content: aiResponse }
+                    ]);
+                }
+                lastProcessedChunkRef.current = newChunk;
+            } catch (error) {
+                console.error("Error processing AI response:", error);
             }
-            lastProcessedChunkRef.current = newChunk;
         }
     };
 
@@ -84,7 +101,7 @@ export default function DiscussionRoomPage() {
             const recognition = new SpeechRecognition();
             recognitionRef.current = recognition;
             recognition.continuous = true;
-            recognition.interimResults = false; // Changed to false to get complete chunks
+            recognition.interimResults = false;
             recognition.lang = 'en-US';
 
             recognition.onresult = (event: any) => {
@@ -96,7 +113,6 @@ export default function DiscussionRoomPage() {
                 setTextChunks(prev => {
                     const newChunks = [...prev, latestChunk];
                     console.log("Current text chunks:", newChunks);
-                    // Process AI response for the latest chunk
                     processAIResponse(latestChunk);
                     return newChunks;
                 });
@@ -179,7 +195,7 @@ export default function DiscussionRoomPage() {
                                 <Image
                                     src={masterDetails.icon}
                                     alt="Master"
-                                    className="animate-pulse rounded-full object-cover size-16 md:size-20 lg:size-24"
+                                    className={`animate-pulse rounded-full object-cover size-16 md:size-20 lg:size-24`}
                                     width={100}
                                     height={100}
                                 />
@@ -214,19 +230,7 @@ export default function DiscussionRoomPage() {
                         </div>
                     )}
                 </div>
-                <div className="md:w-[20vw] h-[60vh]">
-                    <div className="bg-secondary md:w-[20vw] h-[60vh] rounded-lg my-4 flex flex-col justify-start items-start p-4 overflow-y-auto">
-                        <h3>AI Responses:</h3>
-                        {aiResponses.map((response, index) => (
-                            <div key={index} className="mt-2 p-2 bg-gray-100 rounded">
-                                {response}
-                            </div>
-                        ))}
-                    </div>
-                    <h2 className="text-xs text-center">
-                        At the end of the conversation we will automatically generate a feedback report for {user?.displayName} from your conversation
-                    </h2>
-                </div>
+                <Chat aiResponses={aiResponses} />
             </div>
         </div>
     )
