@@ -3,19 +3,7 @@ import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { Suspense } from "react";
-import { Nunito, PT_Sans } from "next/font/google";
 import "./globals.css";
-
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-});
-
-const ptSans = PT_Sans({
-  variable: "--font-pt-sans",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${nunito.variable} ${ptSans.variable} antialiased relative`}
+        className={`antialiased relative`}
       >
         <StackProvider app={stackServerApp}>
           <StackTheme>

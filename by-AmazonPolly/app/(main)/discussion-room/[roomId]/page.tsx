@@ -8,7 +8,8 @@ import { useQuery } from "convex/react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
-import RecordRTC, { StereoAudioRecorder } from 'recordrtc';
+import { RealtimeTranscriber } from "assemblyai"
+import axios from "axios"
 
 type Instructors = { label: string; icon: string };
 
@@ -19,11 +20,9 @@ export default function DiscussionRoomPage() {
     const { roomId } = useParams()
 
     const [masterDetails, setMasterDetails] = useState<Instructors>()
-    const recorderRef = useRef<RecordRTC | null>(null);
-    const [isRecording, setIsRecording] = useState(false);
-    const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [enableMicrophone, setEnableMicrophone] = useState(false);
-
+    const recorder = useRef<any>(null);
+ 
     const discussionRoomData = useQuery(api.discussionRoom.getDiscussionRoomDetails, { id: roomId as Id<"DiscussionRoom"> })
     console.log(discussionRoomData)
 
@@ -36,65 +35,46 @@ export default function DiscussionRoomPage() {
 
 
     const connectToServer = async () => {
-        if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-            alert('Microphone access not supported in this environment.');
-            return;
+        setEnableMicrophone(true);
+        if (typeof window !== "undefined" && typeof navigator !== "undefined") {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(async (stream) => {
+                    const RecordRTC = (await import('recordrtc')).default
+                    recorder.current = new RecordRTC(stream, {
+                        type: 'audio',
+                        mimeType: 'audio/webm;codecs=pcm',
+                        recorderType: RecordRTC.StereoAudioRecorder,
+                        timeSlice: 250,
+                        desiredSampRate: 16000,
+                        numberOfAudioChannels: 1,
+                        bufferSize: 4096,
+                        audioBitsPerSecond: 128000,
+                        ondataavailable: async (blob) => {
+                            // Reset the silence detection timer on audio input
+                            clearTimeout(silenceTimeout);
+
+                            const buffer = await blob.arrayBuffer();
+                            console.log("Buffer: ", buffer)
+                            await blob.arrayBuffer();
+                            // Restart the silence detection timer
+                            silenceTimeout = setTimeout(() => {
+                                console.log('User stopped talking'); // Handle user stopped talking (e.g., send final transcript, stop recording, etc.)
+                            }, 2000);
+                        }
+                    });
+
+                    recorder.current.startRecording();
+                })
+                .catch((err) => console.error(err));
         }
+    }
 
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const recorder = new RecordRTC(stream, {
-                type: 'audio',
-                mimeType: 'audio/webm;codecs=pcm',
-                recorderType: StereoAudioRecorder,
-                timeSlice: 250,
-                desiredSampRate: 16000,
-                numberOfAudioChannels: 1,
-                bufferSize: 4096,
-                audioBitsPerSecond: 128000,
-                ondataavailable: async (blob) => {
-                    const buffer = await blob.arrayBuffer();
-                    // Process audio data here if needed
-                },
-            });
-
-            recorderRef.current = recorder;
-            recorder.startRecording();
-            setIsRecording(true);
-
-            silenceTimeout = setTimeout(() => {
-                stopRecording();
-                console.log('User stopped talking');
-                // Add logic to send final transcript, stop recording, etc.
-            }, 2000);
-        } catch (err) {
-            console.error('Error accessing microphone:', err);
-            alert('Could not access microphone.');
-        }
-    };
-
-    const stopRecording = () => {
-        if (recorderRef.current) {
-            recorderRef.current.stopRecording(() => {
-                const blob = recorderRef.current?.getBlob();
-                setAudioUrl(URL.createObjectURL(blob!));
-                recorderRef.current?.destroy();
-                setIsRecording(false);
-            });
-            clearTimeout(silenceTimeout);
-        }
-    };
-
-    useEffect(() => {
-        return () => {
-            if (recorderRef.current) {
-                recorderRef.current.destroy();
-            }
-            if (audioUrl) {
-                URL.revokeObjectURL(audioUrl);
-            }
-        };
-    }, [audioUrl]);
+    const stopRecording = async (event: any) => {
+        event.preventDefault()
+        recorder.current?.pauseRecording();
+        recorder.current = null;
+        setEnableMicrophone(false);
+    }
 
     return (
         <div>
