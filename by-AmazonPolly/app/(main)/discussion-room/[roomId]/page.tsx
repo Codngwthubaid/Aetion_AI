@@ -1,108 +1,5 @@
-// "use client"
-// import { Button } from "@/components/ui/button"
-// import { AiInstructors } from "@/constants"
-// import { api } from "@/convex/_generated/api"
-// import { Id } from "@/convex/_generated/dataModel"
-// import { UserButton, useUser } from "@stackframe/stack"
-// import { useQuery } from "convex/react"
-// import Image from "next/image"
-// import { useParams } from "next/navigation"
-// import { useState, useEffect, useRef } from "react"
-
-
-// type Instructors = { label: string; icon: string };
-
-// export default function DiscussionRoomPage() {
-
-//     let silenceTimeout: NodeJS.Timeout;
-//     const user = useUser()
-//     const { roomId } = useParams()
-
-//     const [masterDetails, setMasterDetails] = useState<Instructors>()
-//     const [enableMicrophone, setEnableMicrophone] = useState(false);
-//     const recorder = useRef<any>(null);
-
-//     const discussionRoomData = useQuery(api.discussionRoom.getDiscussionRoomDetails, { id: roomId as Id<"DiscussionRoom"> })
-//     console.log(discussionRoomData)
-
-
-//     useEffect(() => {
-//         const fetchMasterDetails = AiInstructors.find((instructor) => instructor.label === discussionRoomData?.masterName)
-//         setMasterDetails(fetchMasterDetails)
-//         console.log("Master Details: ", fetchMasterDetails)
-//     }, [discussionRoomData])
-
-
-//     const connectToServer = async () => {
-//         setEnableMicrophone(true);
-//         if (typeof window !== "undefined" && typeof navigator !== "undefined") {
-//             navigator.mediaDevices.getUserMedia({ audio: true })
-//                 .then(async (stream) => {
-//                     const RecordRTC = (await import('recordrtc')).default
-//                     recorder.current = new RecordRTC(stream, {
-//                         type: 'audio',
-//                         mimeType: 'audio/webm;codecs=pcm',
-//                         recorderType: RecordRTC.StereoAudioRecorder,
-//                         timeSlice: 250,
-//                         desiredSampRate: 16000,
-//                         numberOfAudioChannels: 1,
-//                         bufferSize: 4096,
-//                         audioBitsPerSecond: 128000,
-//                         ondataavailable: async (blob) => {
-//                             // Reset the silence detection timer on audio input
-//                             clearTimeout(silenceTimeout);
-
-//                             const buffer = await blob.arrayBuffer();
-//                             console.log("Buffer: ", buffer)
-//                             await blob.arrayBuffer();
-//                             // Restart the silence detection timer
-//                             silenceTimeout = setTimeout(() => {
-//                                 console.log('User stopped talking'); // Handle user stopped talking (e.g., send final transcript, stop recording, etc.)
-//                             }, 2000);
-//                         }
-//                     });
-
-//                     recorder.current.startRecording();
-//                 })
-//                 .catch((err) => console.error(err));
-//         }
-//     }
-
-//     const stopRecording = async (event: any) => {
-//         event.preventDefault()
-//         recorder.current?.pauseRecording();
-//         recorder.current = null;
-//         setEnableMicrophone(false);
-//     }
-
-//     return (
-//         <div>
-//             <h1>{discussionRoomData?.topicName}</h1>
-//             <div className="flex flex-col md:flex-row items-start justify-center gap-5 mx-auto">
-//                 <div className="flex justify-center items-center flex-col gap-y-4">
-//                     <div className="bg-secondary relative w-[90vw] sm:w-[60vw] h-[60vh] rounded-lg my-4 flex flex-col items-center justify-center gap-4">
-//                         <div className="flex flex-col items-center justify-center gap-4">
-//                             {masterDetails && <Image src={masterDetails.icon} alt="Master" className="animate-pulse rounded-full object-cover size-16 md:size-20 lg:size-24" width={100} height={100} />}
-//                             <div>{masterDetails?.label}</div>
-//                         </div>
-//                         <div className="absolute bottom-5 right-12 bg-secondary-foreground w-24 h-16 rounded-md flex items-center justify-center">
-//                             <UserButton />
-//                         </div>
-//                     </div>
-//                     {!enableMicrophone ? <Button onClick={connectToServer} >Connect</Button> : <Button onClick={stopRecording} variant={"destructive"}>Disconnect</Button>}
-//                 </div>
-//                 <div className="md:w-[20vw] h-[60vh]">
-//                     <div className="bg-secondary md:w-[20vw] h-[60vh] rounded-lg my-4 flex justify-center items-center ">
-//                         <div>hello</div>
-//                     </div>
-//                     <h2 className="text-xs text-center">At the end of the conversation we will automatically generate a feedback report for {user?.displayName} from your conversation</h2>
-//                 </div>
-//             </div>
-//         </div>
-//     )
-// }
-
 "use client"
+import { aiModel } from "@/constants/aiResponse"
 import { Button } from "@/components/ui/button"
 import { AiInstructors } from "@/constants"
 import { api } from "@/convex/_generated/api"
@@ -112,8 +9,8 @@ import { useQuery } from "convex/react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
+import { Loader } from "lucide-react"
 
-// Define SpeechRecognition interface for TypeScript
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
     interimResults: boolean;
@@ -130,13 +27,15 @@ export default function DiscussionRoomPage() {
     let silenceTimeout: NodeJS.Timeout;
     const user = useUser()
     const { roomId } = useParams()
-
+    const [isLoading, setIsLoading] = useState(false)
     const [masterDetails, setMasterDetails] = useState<Instructors>()
     const [enableMicrophone, setEnableMicrophone] = useState(false);
     const [textChunks, setTextChunks] = useState<string[]>([]);
     const [fullTranscript, setFullTranscript] = useState<string>("");
+    const [aiResponses, setAiResponses] = useState<string[]>([]);
     const recorder = useRef<any>(null);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const lastProcessedChunkRef = useRef<string>("");
 
     const discussionRoomData = useQuery(api.discussionRoom.getDiscussionRoomDetails, {
         id: roomId as Id<"DiscussionRoom">
@@ -149,13 +48,32 @@ export default function DiscussionRoomPage() {
         setMasterDetails(fetchMasterDetails)
     }, [discussionRoomData])
 
+    // Process AI response for new chunks
+    // In the processAIResponse function, modify it like this:
+    const processAIResponse = async (newChunk: string) => {
+        if (newChunk && newChunk !== lastProcessedChunkRef.current) {
+            const aiResponse = await aiModel({
+                topic: discussionRoomData?.topic || "default topic",
+                feature: discussionRoomData?.topicName || "default feature",
+                message: newChunk
+            });
+            console.log("AI Response:", aiResponse);
+            if (aiResponse && typeof aiResponse === 'string') {
+                setAiResponses(prev => [...prev, aiResponse]);
+            }
+            lastProcessedChunkRef.current = newChunk;
+        }
+    };
+
     const connectToServer = async () => {
+        setIsLoading(true)
         setEnableMicrophone(true);
         setTextChunks([]);
         setFullTranscript("");
+        setAiResponses([]);
 
+        setIsLoading(false)
         if (typeof window !== "undefined" && typeof navigator !== "undefined") {
-            // Check for SpeechRecognition support
             const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
             if (!SpeechRecognition) {
@@ -166,7 +84,7 @@ export default function DiscussionRoomPage() {
             const recognition = new SpeechRecognition();
             recognitionRef.current = recognition;
             recognition.continuous = true;
-            recognition.interimResults = true;
+            recognition.interimResults = false; // Changed to false to get complete chunks
             recognition.lang = 'en-US';
 
             recognition.onresult = (event: any) => {
@@ -176,14 +94,10 @@ export default function DiscussionRoomPage() {
                 const latestChunk = event.results[event.results.length - 1][0].transcript;
 
                 setTextChunks(prev => {
-                    const newChunks = [...prev];
-                    if (newChunks.length > 0) {
-                        newChunks[newChunks.length - 1] = latestChunk;
-                    } else {
-                        newChunks.push(latestChunk);
-                    }
-                    // Log the current text chunks
+                    const newChunks = [...prev, latestChunk];
                     console.log("Current text chunks:", newChunks);
+                    // Process AI response for the latest chunk
+                    processAIResponse(latestChunk);
                     return newChunks;
                 });
 
@@ -202,7 +116,6 @@ export default function DiscussionRoomPage() {
             };
 
             recognition.onend = () => {
-                // Restart recognition if it ends unexpectedly while microphone is enabled
                 if (enableMicrophone && recognitionRef.current) {
                     recognitionRef.current.start();
                 }
@@ -214,7 +127,6 @@ export default function DiscussionRoomPage() {
                 console.error('Error starting speech recognition:', err);
             }
 
-            // Existing RecordRTC code
             navigator.mediaDevices.getUserMedia({ audio: true })
                 .then(async (stream) => {
                     const RecordRTC = (await import('recordrtc')).default
@@ -229,7 +141,6 @@ export default function DiscussionRoomPage() {
                         audioBitsPerSecond: 128000,
                         ondataavailable: async (blob) => {
                             clearTimeout(silenceTimeout);
-                            const buffer = await blob.arrayBuffer();
                             silenceTimeout = setTimeout(() => {
                                 console.log('User stopped talking');
                             }, 2000);
@@ -243,19 +154,18 @@ export default function DiscussionRoomPage() {
 
     const stopRecording = async (event: any) => {
         event.preventDefault();
-
+        setIsLoading(true)
         if (recognitionRef.current) {
             recognitionRef.current.stop();
             const finalTranscript = textChunks.join(' ');
             setFullTranscript(finalTranscript);
-            // Log the full transcript
-            console.log("Full transcript:", finalTranscript);
             recognitionRef.current = null;
         }
 
         recorder.current?.pauseRecording();
         recorder.current = null;
         setEnableMicrophone(false);
+        setIsLoading(false)
     }
 
     return (
@@ -281,14 +191,20 @@ export default function DiscussionRoomPage() {
                         </div>
                     </div>
                     {!enableMicrophone ? (
-                        <Button onClick={connectToServer}>Connect</Button>
+                        <Button onClick={connectToServer} disabled={isLoading}>
+                            {isLoading && <Loader className="animated-spin" />} Connect
+                        </Button>
                     ) : (
-                        <Button onClick={stopRecording} variant={"destructive"}>Disconnect</Button>
+                        <Button onClick={stopRecording} variant={"destructive"}>
+                            {isLoading && <Loader className="animated-spin" />} Disconnect
+                        </Button>
                     )}
                     {enableMicrophone && (
                         <div className="mt-4">
                             <h3>Real-time Transcript:</h3>
-                            <p>{textChunks.join(' ')}</p>
+                            <div>{textChunks.map((chunk, index) => (
+                                <p key={index}>{chunk}</p>
+                            ))}</div>
                         </div>
                     )}
                     {!enableMicrophone && fullTranscript && (
@@ -299,8 +215,13 @@ export default function DiscussionRoomPage() {
                     )}
                 </div>
                 <div className="md:w-[20vw] h-[60vh]">
-                    <div className="bg-secondary md:w-[20vw] h-[60vh] rounded-lg my-4 flex justify-center items-center">
-                        <div>hello</div>
+                    <div className="bg-secondary md:w-[20vw] h-[60vh] rounded-lg my-4 flex flex-col justify-start items-start p-4 overflow-y-auto">
+                        <h3>AI Responses:</h3>
+                        {aiResponses.map((response, index) => (
+                            <div key={index} className="mt-2 p-2 bg-gray-100 rounded">
+                                {response}
+                            </div>
+                        ))}
                     </div>
                     <h2 className="text-xs text-center">
                         At the end of the conversation we will automatically generate a feedback report for {user?.displayName} from your conversation
