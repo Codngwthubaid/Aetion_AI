@@ -12,8 +12,6 @@ export const DiscussionRoom = mutation({
     }
 })
 
-
-
 export const getDiscussionRoomDetails = query({
     args: { id: v.id("DiscussionRoom") },
     handler: async (ctx, args) => {
