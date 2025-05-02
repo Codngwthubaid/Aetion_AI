@@ -2,10 +2,11 @@
 import { UserDetailsContext } from "@/context/UserDetailsContext";
 import { supabase } from "@/services/supabaseClient";
 import { useContext, useEffect, useState } from "react";
+import type { UserType } from "@/types/index";
 
 export default function Provider({ children }: { children: React.ReactNode }) {
 
-    const [user, setUser] = useState<string | null>()
+    const [user, setUser] = useState<UserType>()
     useEffect(() => { createNewUser() }, [])
 
     const createNewUser = () => {
@@ -28,7 +29,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
                     ]
                 )
                 console.log(data);
-                setUser(data)
+                setUser(data?.[0])
                 return;
             }
             if (Users) { setUser(Users[0]) }
