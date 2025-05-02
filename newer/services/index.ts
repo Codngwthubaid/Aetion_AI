@@ -33,3 +33,4 @@ export const SidebarLinks: SidebarLink[] = [
         path: "/settings"
     }
 ];
+

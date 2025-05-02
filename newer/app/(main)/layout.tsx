@@ -4,7 +4,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <>
             <DashboardProvider>
-                <div className="p-10">
+                <div>
                 {children}
                 </div>
             </DashboardProvider>
