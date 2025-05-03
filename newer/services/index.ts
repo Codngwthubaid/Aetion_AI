@@ -90,7 +90,6 @@ export const interviewTypes: InterviewType[] = [
         icon: ShieldEllipsis
     },
 ]
-
 export const PROMPT = `You are an expert technical interviewer.
 
 Given the following inputs:
@@ -100,15 +99,14 @@ Given the following inputs:
 - Interview Type: {{type}}
 
 Your task:
-1. Carefully analyze the job description to identify the key responsibilities, required technical and soft skills, and the level of experience expected for the role.
-2. Generate a well-structured list of high-quality interview questions tailored to the specified job title and description.
-3. Adjust the number, complexity, and depth of the questions to fit within the provided interview duration, ensuring a balanced assessment of both technical and behavioral competencies.
-4. Ensure the tone, style, and format of the questions are appropriate for a real-life {{type}} interview.
-5. Categorize each question by type, such as: Technical, Behavioral, Experience-based, Problem-solving, or Leadership.
+1. Analyze the job description to identify the key responsibilities, required skills, and expected experience for the role.
+2. Generate a list of high-quality interview questions tailored to the job title, description, and interview type.
+3. Adjust the number and depth of questions to fit the interview duration.
+4. For each question, specify its type: Technical, Behavioral, Experience, Problem-solving, or Leadership.
 
-Format your response in valid JSON as an array of objects, where each object contains:
-- "question": The interview question
-- "type": The category of the question (Technical/Behavioral/Experience/Problem-solving/Leadership)
+Output ONLY a valid JSON array of objects, where each object contains:
+- "question": The interview question.
+- "type": The category of the question.
 
-The goal is to create a structured, relevant, and time-optimized interview plan for the {{jobTitle}} role.
+Do not include any explanations, notes, analysis, or additional text-just the JSON array.
 `;

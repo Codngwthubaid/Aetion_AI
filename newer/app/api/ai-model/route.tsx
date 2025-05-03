@@ -12,7 +12,6 @@ export async function POST(request: NextRequest, response: NextResponse) {
         .replace('{{duration}}', InterviewDuration)
         .replace('{{type}}', InterviewType);
 
-    console.log(FINAL_PROMPT)
     try {
         const openai = new OpenAI({
             baseURL: 'https://openrouter.ai/api/v1',
@@ -20,7 +19,7 @@ export async function POST(request: NextRequest, response: NextResponse) {
         });
 
         const completion = await openai.chat.completions.create({
-            model: 'google/gemini-2.5-pro-exp-03-25',
+            model: 'deepseek/deepseek-chat-v3-0324:free',
             messages: [
                 {
                     role: 'user',
