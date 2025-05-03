@@ -10,7 +10,7 @@ import { useUser } from "@/app/provider"
 import { v4 as uuidv4 } from 'uuid';
 
 
-export default function AiGeneratedQuestionList({ formData , onCreateLink}: any) {
+export default function AiGeneratedQuestionList({ formData, onCreateLink }: any) {
 
     const { user } = useUser()
     const [isLoading, setIsLoading] = useState(true)
@@ -39,9 +39,11 @@ export default function AiGeneratedQuestionList({ formData , onCreateLink}: any)
         }
     }
 
+    
     const onFinish = async () => {
         setIsQuestionSavingLoading(true)
         const interviewId = uuidv4();
+        console.log(" interviewId:", interviewId)
         try {
             const { data, error } = await supabase
                 .from('Interviews')
@@ -67,8 +69,6 @@ export default function AiGeneratedQuestionList({ formData , onCreateLink}: any)
         }
 
     };
-
-
 
 
     return (

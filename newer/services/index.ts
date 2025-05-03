@@ -90,6 +90,8 @@ export const interviewTypes: InterviewType[] = [
         icon: ShieldEllipsis
     },
 ]
+
+
 export const PROMPT = `You are an expert technical interviewer.
 
 Given the following inputs:

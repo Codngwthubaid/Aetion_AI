@@ -5,15 +5,15 @@ import { Progress } from "@/components/ui/progress"
 import { useState } from "react";
 import FormContainer from "./_components/form-container";
 import AiGeneratedQuestionList from "./_components/ai-generated-question-list";
-import { toast } from "sonner";
 import InterviewLink from "./_components/interview-link";
+import { toast } from "sonner";
 
 export default function CreateInterview() {
 
     const router = useRouter()
     const [isStep, setIsStep] = useState(3)
     const [formData, setFormData] = useState<{ [key: string]: string }>({})
-    const [isInterviewId, setIsInterviewId] = useState("")
+    const [isInterviewId, setIsInterviewId] = useState<string>()
 
     const onHandleInputChange = ({ field, value }: { field: string, value: string }) => {
         setFormData((prevData) => ({
@@ -32,6 +32,8 @@ export default function CreateInterview() {
         setIsInterviewId(interviewId)
         setIsStep(prev => prev + 1)
     }
+
+    console.log(isInterviewId)
 
 
     return (

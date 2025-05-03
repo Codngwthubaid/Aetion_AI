@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/button"
-import { Calendar, CircleCheckBig, Clock10, Copy, Menu } from "lucide-react"
-import { title } from "process"
+import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
+import { Calendar, CircleCheckBig, Clock10, Copy, MailIcon, Menu, MessageCircleMore, Plus, Rss, Slack } from "lucide-react"
+import { toast } from "sonner"
 
 export default function InterviewLink({ interviewId, formData }: any) {
 
+    console.log(formData , interviewId)
+    
     const interviewDetails = [
         {
             icon: <Clock10 />,
-            desc: "30 min",
+            desc: formData?.InterviewDuration,
         },
         {
             icon: <Menu />,
@@ -18,6 +22,32 @@ export default function InterviewLink({ interviewId, formData }: any) {
             desc: "Expries in 24 hours",
         },
     ]
+
+    const shareLink = [
+        {
+            icon: <MailIcon />,
+            name: "Email"
+        },
+        {
+            icon: <Slack />,
+            name: "Slack"
+        },
+        {
+            icon: <MessageCircleMore />,
+            name: "Whatsapp"
+        },
+    ]
+
+    const router = useRouter()
+    const url = process.env.NEXT_PUBLIC_HOST_URL + "/" + interviewId
+
+    const getInterviewLink = () => { return url }
+
+    const onlickCopyLink = async () => {
+        await navigator.clipboard.writeText(url)
+        toast.success("Link copied to clipboard")
+    }
+
 
     return (
         <div>
@@ -37,8 +67,8 @@ export default function InterviewLink({ interviewId, formData }: any) {
                     </Button>
                 </div>
                 <div className="flex items-center justify-between gap-x-3">
-                    <div className="bg-zinc-50 p-2 rounded-md w-full">https://interview.ai/interviewId</div>
-                    <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer">
+                    <Input defaultValue={getInterviewLink()} disabled={true} />
+                    <Button className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer" onClick={onlickCopyLink}>
                         <Copy /> Copy Link
                     </Button>
                 </div>
@@ -51,6 +81,32 @@ export default function InterviewLink({ interviewId, formData }: any) {
                         </div>
                     ))}
                 </div>
+            </div>
+
+            <div className="bg-emerald-50 p-4 rounded-lg flex flex-col gap-y-5 my-10">
+                <div className="flex items-center gap-x-2 font-semibold">
+                    <Rss />
+                    <span>Share via</span>
+                </div>
+                <div className="flex gap-x-10 justify-between w-full">
+                    {
+                        shareLink.map((item, index) => (
+                            <Button
+                                key={index}
+                                variant={"outline"}
+                                className="bg-emerald-500 w-1/4 hover:bg-emerald-600 cursor-pointer text-white hover:text-white">
+                                {item.icon} {item.name}
+                            </Button>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <div className="flex w-full gap-x-5 items-center">
+                <Button className="w-1/2 cursor-pointer" variant={"outline"} onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
+                <Button className="w-1/2 cursor-pointer bg-emerald-500 hover:bg-emerald-600" onClick={() => router.push("/dashboard/create-interview")}>
+                    <Plus /> Create New Interview
+                </Button>
             </div>
         </div>
     )
