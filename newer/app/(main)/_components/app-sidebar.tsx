@@ -13,13 +13,13 @@ import { SidebarLinks } from "@/services"
 import { Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 export default function AppSidebar() {
-  
+  const router = useRouter()
   const path = usePathname()
   console.log(path)
-  
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -27,7 +27,12 @@ export default function AppSidebar() {
           <Image src="/logo.svg" width={200} height={200} alt="logo" className="w-20" />
           <h2 className="font-bold text-3xl font-mono text-emerald-600">MOKI</h2>
         </div>
-        <Button variant={"default"} className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer"><Plus /> Create new Interview</Button>
+        <Button
+          variant={"default"}
+          onClick={() => router.push("/dashboard/create-interview")}
+          className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer">
+          <Plus /> Create new Interview
+        </Button>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

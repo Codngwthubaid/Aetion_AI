@@ -8,7 +8,7 @@ export default function Dashboard() {
     return (
         <h1>
             {/* <UserDetailsHeader /> */}
-            <h2 className="font-bold text-2xl my-6 text-emerald-500">Dashboard</h2>
+            <div className="font-bold text-2xl my-6 text-emerald-500">Dashboard</div>
             <CreateOptions />
             <LatestInterviewList />
         </h1>
