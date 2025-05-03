@@ -11,8 +11,9 @@ import InterviewLink from "./_components/interview-link";
 export default function CreateInterview() {
 
     const router = useRouter()
-    const [isStep, setIsStep] = useState(1)
+    const [isStep, setIsStep] = useState(3)
     const [formData, setFormData] = useState<{ [key: string]: string }>({})
+    const [isInterviewId, setIsInterviewId] = useState("")
 
     const onHandleInputChange = ({ field, value }: { field: string, value: string }) => {
         setFormData((prevData) => ({
@@ -26,6 +27,12 @@ export default function CreateInterview() {
         if (!formData?.JobPosition || !formData.JobDescription || !formData.InterviewDuration || !formData.InterviewType) return toast.warning("Plese fill all the required fields");
         else toast.success("Form submitted successfully"); setIsStep(prev => prev + 1)
     }
+
+    const onCreateLink = (interviewId: string) => {
+        setIsInterviewId(interviewId)
+        setIsStep(prev => prev + 1)
+    }
+
 
     return (
         <div className="w-[90%] mx-auto">
@@ -42,9 +49,12 @@ export default function CreateInterview() {
                     GoToNext={() => onGoToNext()}
                 />
                     :
-                    isStep == 2 ? <AiGeneratedQuestionList formData={formData} />
+                    isStep == 2 ? <AiGeneratedQuestionList
+                        formData={formData}
+                        onCreateLink={(interviewId: string) => onCreateLink(interviewId)}
+                    />
                         :
-                        isStep == 3 ? <InterviewLink />
+                        isStep == 3 ? <InterviewLink interviewId={isInterviewId} formData={formData} />
                             :
                             null
             }

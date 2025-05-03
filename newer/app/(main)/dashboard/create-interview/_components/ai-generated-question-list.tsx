@@ -10,7 +10,7 @@ import { useUser } from "@/app/provider"
 import { v4 as uuidv4 } from 'uuid';
 
 
-export default function AiGeneratedQuestionList({ formData }: any) {
+export default function AiGeneratedQuestionList({ formData , onCreateLink}: any) {
 
     const { user } = useUser()
     const [isLoading, setIsLoading] = useState(true)
@@ -59,6 +59,7 @@ export default function AiGeneratedQuestionList({ formData }: any) {
                 .select();
 
             setIsQuestionSavingLoading(false)
+            onCreateLink(interviewId)
         } catch (e) {
             console.error('Unexpected Error:', e);
         } finally {
@@ -66,6 +67,8 @@ export default function AiGeneratedQuestionList({ formData }: any) {
         }
 
     };
+
+
 
 
     return (
@@ -101,7 +104,8 @@ export default function AiGeneratedQuestionList({ formData }: any) {
                     disabled={isQuestionSavingLoading}
                     onClick={() => { onFinish() }}
                     className="bg-emerald-500 hover:bg-emerald-600 cursor-pointer">
-                    <Loader className={isQuestionSavingLoading ? "animate-spin text-emerald-500" : ""} /> Finish
+                    <Loader className={isQuestionSavingLoading ? "animate-spin text-emerald-500" : ""} />
+                    Genearte Interview Link
                 </Button>
             </div>
         </div>
